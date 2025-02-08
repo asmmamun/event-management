@@ -1,0 +1,229 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizer Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+<body class="bg-gray-100">
+    <header class="bg-white shadow sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-rose-600">Utshob Event Management: Organizer Dashboard</h1>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-6">
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow">   
+                <p class="text-3xl font-bold text-indigo-600">Total Participants: {{ total_participants.total }}</p>
+            </div>
+            
+            <div class="bg-white p-4 rounded-lg shadow">
+                <!-- Total Events Button -->
+                <form method="get" action="{% url 'org_dashboard' %}">
+                    <button type="submit" name="show_events" value="1" class="text-3xl font-bold text-indigo-600">
+                        Total Events: {{ total_events }}
+                    </button>
+                </form>
+
+                {% if request.GET.show_events %}
+                    <div id="events-list">
+                        {% for event in events %}
+                            <div class="event-item py-2">
+                                <h3 class="text-blue-500">Event: {{ event.name }}</h3>
+                                <p> Description: {{ event.description }}</p>
+                                <p>Date: {{ event.date }}</p>
+                                <p>Category: {{ event.category.name }}</p>
+                            </div>
+                        {% empty %}
+                            <p>No events found.</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="bg-white p-4 rounded-lg shadow">
+                <!-- Upcoming Events Button -->
+                <form method="get" action="{% url 'org_dashboard' %}">
+                    <button type="submit" name="show_upcoming_events" value="1" class="text-3xl font-bold text-indigo-600">
+                        Upcoming Events: {{ upcoming_events }}
+                    </button>
+                </form>
+
+                {% if request.GET.show_upcoming_events %}
+                    <div id="events-list">
+                        {% for event in events %}
+                            {% if event.date >= today %}
+                                <div class="event-item py-2">
+                                    <h3 class="text-blue-500">Event: {{ event.name }}</h3>
+                                    <p> Description: {{ event.description }}</p>
+                                    <p>Date: {{ event.date }}</p>
+                                    <p>Category: {{ event.category.name }}</p>
+                                </div>
+                            {% endif %}
+                        {% empty %}
+                            <p>No upcoming events found.</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="bg-white p-4 rounded-lg shadow">
+                <!-- Past Events Button -->
+                <form method="get" action="{% url 'org_dashboard' %}">
+                    <button type="submit" name="show_past_events" value="1" class="text-3xl font-bold text-indigo-600">
+                        Past Events: {{ past_events }}
+                    </button>
+                </form>
+
+                {% if request.GET.show_past_events %}
+                    <div id="events-list">
+                        {% for event in events %}
+                            {% if event.date < today %}
+                                <div class="event-item py-2">
+                                    <h3 class="text-blue-500">Event: {{ event.name }}</h3>
+                                    <p> Description: {{ event.description }}</p>
+                                    <p>Date: {{ event.date }}</p>
+                                    <p>Category: {{ event.category.name }}</p>
+                                </div>
+                            {% endif %}
+                        {% empty %}
+                            <p>No past events found.</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow">   
+            <p class="text-3xl font-bold text-indigo-600">Total Unique Participants: {{ total_unique_participants }}</p>
+        </div>
+    </div>
+
+    <div class="py-10 mb-16 text-center">
+        <h2 class="text-3xl font-bold mb-6 text-indigo-600">Today's Event: {{ today_events_count }} </h2>
+
+        {% if events_today %}
+            <ul class="space-y-4">
+                {% for event in events_today %}
+                    <li class="p-4 border rounded-lg bg-blue-50 hover:bg-blue-100">
+                        <h2 class="text-xl text-blue-500">{{ event.name }}</h2>
+                        <p class="text-gray-700">{{ event.description }}</p>
+                        <p class="text-gray-700">{{ event.date }} at {{ event.time }}</p>
+                        <p class="text-gray-500">Category: {{ event.category.name }}</p>
+                        <p class="text-gray-500">Participants: {{ event.participants.count }}</p>
+                        {% for participant_name in participants_names %}
+                            <p>{{participant_name}}</p>
+                        {% endfor %}
+                        {% comment %} <p class="text-gray-500">Participant Name: {{ event_participants_names }}</p> {% endcomment %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-gray-500 text-xl">No events for today.</p>
+        {% endif %}
+    </div>
+
+
+    <!-- Add Buttons -->
+    <div class="mt-6 mb-10 text-center">
+        <div class="flex justify-center gap-4">
+            <a href="{% url 'event_create' %}" class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-600">
+                + Add Event
+            </a>
+            <a href="{% url 'participant_create' %}" class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-600">
+                + Add Participant
+            </a>
+            <a href="{% url 'category_create' %}" class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-600">
+                + Add Category
+            </a>
+        </div>
+    </div>
+
+    <!-- Event Table -->
+    {% comment %} <div id="events" class="container mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
+        <h1 class="text-3xl font-bold mb-6 text-center text-indigo-600">Event List</h1>
+        
+        <!-- Filter Form -->
+        <div class="mb-6">
+            <form method="get" class="flex flex-wrap gap-4 items-center">
+                <select name="category" class="border p-3 rounded-md shadow-sm">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <!-- Date Range Filter -->
+                <label for="start_date" class="text-gray-700">Start Date:</label>
+                <input type="date" name="start_date" class="border p-3 rounded-md shadow-sm" placeholder="Start Date">
+                <label for="end_date" class="text-gray-700">End Date:</label>
+                <input type="date" name="end_date" class="border p-3 rounded-md shadow-sm" placeholder="End Date">
+        
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-600">
+                    Filter
+                </button>
+            </form>
+        </div>
+
+        <!-- Event Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse border bg-white shadow-md rounded-lg">
+                <thead>
+                    <tr class="bg-blue-500 text-white">
+                        <th class="border p-3">Name</th>
+                        <th class="border p-3">Date</th>
+                        <th class="border p-3">Time</th>
+                        <th class="border p-3">Category</th>
+                        <th class="border p-3">Location</th>
+                        <th class="border p-3">Participants</th>
+                        <th class="border p-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                        <tr class="{% cycle 'bg-gray-50' 'bg-white' %} hover:bg-gray-100 py-2">
+                            <td class="border p-3">{{ event.name }}</td>
+                            <td class="border p-3">{{ event.date }}</td>
+                            <td class="border p-3">{{ event.time }}</td>
+                            <td class="border p-3">{{ event.category.name }}</td>
+                            <td class="border p-3">{{ event.location }}</td>
+                            <td class="border p-3 text-center">{{ event.participants.count }}</td>
+                            <td class="border p-3 flex space-x-2 justify-center gap-4">
+                                <a href="{% url 'event_update' event.id %}" class="text-blue-500 hover:text-blue-700">Edit</a>
+                
+                                <!-- Delete Form -->
+                                <form action="{% url 'event_delete' event.id %}" method="POST" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-red-500 hover:text-red-700 bg-transparent border-none cursor-pointer mr-4">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    
+
+    </div> {% endcomment %}
+</body>
+
+<footer id="contact" class="bg-gray-800 text-white py-10">
+    <div class="container mx-auto px-4 text-center">
+        {% comment %} <h3 class="text-xl font-bold mb-4">Contact Us</h3> {% endcomment %}
+        <h4 class="text-xl font-bold mb-4">Utshob Event Management</h4>
+        <div class="flex justify-center gap-4 mb-4">
+            <a href="https://www.facebook.com" class="hover:text-indigo-400" target="_blank" rel="noopener noreferrer">Facebook</a>
+            <a href="https://www.x.com" class="hover:text-indigo-400" target="_blank" rel="noopener noreferrer">Twitter</a>
+            <a href="https://www.instagram.com" class="hover:text-indigo-400" target="_blank" rel="noopener noreferrer">Instagram</a>
+        </div>
+    </div>
+</footer>
+
+</html>

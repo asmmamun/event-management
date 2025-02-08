@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Category</title>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+
+    <div class="w-10 h-20 max-w-3xl bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-green-800 mb-4 text-center">Add Category</h2>
+
+        <!-- Display success messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% comment %} Form for Adding Category {% endcomment %}
+        <form method="post" class="space-y-4 w-full">
+            {% csrf_token %}
+            <div class="space-y-2">
+                {{ form }}
+            </div>
+            <button type="submit" class="w-5 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                Submit
+            </button>
+        </form>
+
+        {% comment %} List of Categories {% endcomment %}
+        <div class="mt-8">
+            <h1 class="text-3xl font-bold text-center text-gray-700 mb-6">Category List</h1>
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse border border-gray-200 rounded-lg shadow-md">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+                            <th class="py-3 px-6 text-left">Name</th>
+                            <th class="py-3 px-6 text-left">Description</th>
+                            <th class="py-3 px-6 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-600 text-sm">
+                        {% for category in categories %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-100">
+                            <td class="py-3 px-6">{{ category.name }}</td>
+                            <td class="py-3 px-6">{{ category.description }}</td>
+                            <td class="py-3 px-6 text-center flex gap-4">
+                                <a href="{% url 'category_update' category.id %}" class="text-blue-500 hover:underline">Edit</a>
+                                
+                                <!-- Delete Form -->
+                                <form action="{% url 'category_delete' category.id %}" method="post" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-red-500 hover:underline ml-3" onclick="return confirm('Are you sure?');">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-gray-500">No categories found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

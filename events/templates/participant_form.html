@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Participant</title>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+
+    <div class="w-10 h-20 max-w-3xl bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-geen-800 mb-4 text-center">Add Participant</h2>
+
+        <!-- Display success messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Form for Adding Participants -->
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div class="space-y-2">
+                {{ form }}
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                Submit
+            </button>
+        </form>
+
+        {% comment %} List of Participants {% endcomment %}
+        <div class="mt-8">
+            <h1 class="text-3xl font-bold text-center text-gray-700 mb-6">Participant List</h1>
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse border border-gray-200 rounded-lg shadow-md">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+                            <th class="py-3 px-6 text-center">Name</th>
+                            <th class="py-3 px-6 text-center">Email</th>
+                            <th class="py-3 px-6 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-600 text-sm">
+                        {% for participant in participants %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-100">
+                            <td class="py-3 px-6 text-center">{{ participant.name }}</td>
+                            <td class="py-3 px-6 text-center">{{ participant.email }}</td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex space-x-3 justify-center gap-4">
+                                    <a href="{% url 'participant_update' participant.id %}" class="text-blue-500 hover:underline">Edit</a>
+                                    
+                                    <!-- Delete Form -->
+                                    <form action="{% url 'participant_delete' participant.id %}" method="POST" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-red-500 hover:underline" onclick="return confirm('Are you sure?');">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-gray-500">No participants found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

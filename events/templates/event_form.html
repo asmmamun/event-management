@@ -1,0 +1,201 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Form</title>
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    {% comment %} <style>
+        /* Additional styles for the page */
+        body {
+            background-color: #f3f4f6;
+            font-family: sans-serif;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 3rem auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-container, .event-list-container {
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            text-align: center;
+            color: #4a4a4a;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .message {
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .message.success {
+            background-color: #38a169;
+            color: white;
+        }
+
+        .message.error {
+            background-color: #e53e3e;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #f43f5e;
+            outline: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: #e11d48;
+            color: white;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #be123c;
+        }
+
+        .event-item {
+            padding: 1rem;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+    </style> {% endcomment %}
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+    <div class="form-container">
+        <h2 class="text-2xl font-bold text-green-800 mb-4 text-center">Create an Event</h2>
+
+        <div>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message {% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                {{ event_form.as_p }}
+            </div>
+
+            <button type="submit" class="submit-btn w-5 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                Submit
+            </button>
+        </form>
+
+        
+
+        <div class="event-list-container">
+            <h3 class="text-2xl font-bold text-green-800 mb-4 text-center">Event List</h3>
+            <div class="filter-container">
+                {% comment %} <h3 class="text-2xl font-bold text-green-800 mb-4 text-center">Filter Events</h3> {% endcomment %}
+                <form method="GET" class="flex gap-4">
+                    <div class="form-group flex gap-4">
+                        <label for="category">Category:</label>
+                        <select name="category" id="category" class="w-full p-2 border border-gray-300 rounded">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if category.id == category_filter %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+    
+                    <div class="form-group flex gap-4">
+                        <label for="start_date" class="w-full">Start Date:</label>
+                        <input type="date" name="start_date" id="start_date" class="w-full p-2 border border-gray-300 rounded" value="{{ request.GET.start_date }}">
+                    </div>
+    
+                    <div class="form-group flex gap-4">
+                        <label for="end_date" class="w-full">End Date:</label>
+                        <input type="date" name="end_date" id="end_date" class="w-full p-2 border border-gray-300 rounded" value="{{ request.GET.end_date }}">
+                    </div>
+    
+                    <button type="submit" class="submit-btn w-5 bg-green-500 hover:bg-blue-600 text-white font-bold px-4 rounded">Filter</button>
+                </form>
+            </div>
+            <!-- Event Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse border bg-white shadow-md rounded-lg">
+                <thead>
+                    <tr class="bg-blue-500 text-white">
+                        <th class="border p-3">Name</th>
+                        <th class="border p-3">Date</th>
+                        <th class="border p-3">Time</th>
+                        <th class="border p-3">Category</th>
+                        <th class="border p-3">Location</th>
+                        <th class="border p-3">Participants</th>
+                        <th class="border p-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                        <tr class="{% cycle 'bg-gray-50' 'bg-white' %} hover:bg-gray-100 py-2">
+                            <td class="border p-3">{{ event.name }}</td>
+                            <td class="border p-3">{{ event.date }}</td>
+                            <td class="border p-3">{{ event.time }}</td>
+                            <td class="border p-3">{{ event.category.name }}</td>
+                            <td class="border p-3">{{ event.location }}</td>
+                            <td class="border p-3 text-center">{{ event.participants.count }}</td>
+                            <td class="border p-3 flex space-x-2 justify-center gap-4">
+                                <a href="{% url 'event_update' event.id %}" class="text-blue-500 hover:text-blue-700">Edit</a>
+                
+                                <!-- Delete Form -->
+                                <form action="{% url 'event_delete' event.id %}" method="POST" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-red-500 hover:text-red-700 bg-transparent border-none cursor-pointer mr-4">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </div>
+
+    </div>
+</body>
+</html>
