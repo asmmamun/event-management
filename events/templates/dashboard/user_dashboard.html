@@ -5,8 +5,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Event Management</title>
-  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+  <title>User Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  {% comment %} <link rel="stylesheet" href="{% static 'css/output.css' %}"> {% endcomment %}
 </head>
 
 <body class="bg-gray-50 text-gray-800">
@@ -14,13 +15,23 @@
   <header class="bg-white shadow sticky top-0 z-50">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
       <h1 class="text-2xl font-bold text-indigo-600">Utshob Event Management</h1>
+
+      <!-- Hamburger Button (Visible only on mobile) -->
+      <div class="md:hidden">
+        <button id="hamburger" class="flex flex-col gap-2 p-2" aria-label="Toggle Navigation">
+          <span class="w-6 h-1 bg-gray-700"></span>
+          <span class="w-6 h-1 bg-gray-700"></span>
+          <span class="w-6 h-1 bg-gray-700"></span>
+        </button>
+      </div>
+
+      <!-- Desktop Navigation -->
       <nav class="hidden md:flex gap-4">
         <a href="#home" class="hover:text-indigo-600">Home</a>
         <a href="#events" class="hover:text-indigo-600">Events</a>
         <a href="#contact" class="hover:text-indigo-600">Contact</a>
         <a href="{% url 'org_dashboard' %}" class="hover:text-indigo-600">Org-Dashboard</a>
       </nav>
-      {% comment %} <a href="#register" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Register</a> {% endcomment %}
     </div>
   </header>
 
@@ -59,20 +70,36 @@
         {% empty %}
           <p>No events found.</p>
         {% endfor %}
-
       </div>
     </div>
   </section>
-</body>
-<footer id="contact" class="bg-gray-800 text-white py-10">
-  <div class="container mx-auto px-4 text-center">
-      {% comment %} <h3 class="text-xl font-bold mb-4">Contact Us</h3> {% endcomment %}
+
+  {% comment %} Footer Section {% endcomment %}
+  <footer id="contact" class="bg-gray-800 text-white py-10">
+    <div class="container mx-auto px-4 text-center">
       <h4 class="text-xl font-bold mb-4">Utshob Event Management</h4>
       <div class="flex justify-center gap-4 mb-4">
           <a href="https://www.facebook.com" class="hover:text-indigo-400" target="_blank" rel="noopener noreferrer">Facebook</a>
           <a href="https://www.x.com" class="hover:text-indigo-400" target="_blank" rel="noopener noreferrer">Twitter</a>
           <a href="https://www.instagram.com" class="hover:text-indigo-400" target="_blank" rel="noopener noreferrer">Instagram</a>
       </div>
-  </div>
-</footer>
+    </div>
+  </footer>
+
+  <!-- Mobile Menu (Hidden by default) -->
+  <nav id="mobile-menu" class="hidden absolute top-16 left-0 w-full bg-white shadow-md md:hidden">
+    <a href="#home" class="block py-2 px-4 text-center hover:bg-gray-100">Home</a>
+    <a href="#events" class="block py-2 px-4 text-center hover:bg-gray-100">Events</a>
+    <a href="#contact" class="block py-2 px-4 text-center hover:bg-gray-100">Contact</a>
+    <a href="{% url 'org_dashboard' %}" class="block py-2 px-4 text-center hover:bg-gray-100">Org-Dashboard</a>
+  </nav>
+
+  <script>
+    // Toggle mobile menu visibility when hamburger is clicked
+    document.getElementById('hamburger').addEventListener('click', function () {
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('hidden');
+    });
+  </script>
+</body>
 </html>
